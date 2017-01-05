@@ -1,8 +1,8 @@
 {
-  "name": "__MSG_appName__",
+  "name": "TraktTo",
   "version": "0.0.1",
   "manifest_version": 2,
-  "description": "__MSG_appDescription__",
+  "description": "Lets you export trakt.tv lists to json.",
   "icons": {
     "16": "images/icon-16.png",
     "128": "images/icon-128.png"
