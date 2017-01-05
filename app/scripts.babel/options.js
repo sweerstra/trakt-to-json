@@ -3,26 +3,26 @@
         typeSelect = document.getElementById('type'),
         sortCheckbox = document.getElementById('cbSort'),
         sortSelect = document.getElementById('sort'),
-        amountInput = document.getElementById('amount'),
-        yearsInput = document.getElementById('years');
+        amount = document.getElementById('amount'),
+        years = document.getElementById('years');
 
     document.addEventListener('DOMContentLoaded', () => {
         const options = JSON.parse(localStorage.getItem('options'));
 
-        if (!options) return;
+        if (options) {
+            typeCheckbox.checked = options.type.set;
+            typeSelect.value = options.type.value;
 
-        typeCheckbox.checked = options.type.set;
-        typeSelect.value = options.type.value;
+            sortCheckbox.checked = options.sort.set;
+            sortSelect.value = options.sort.value;
 
-        sortCheckbox.checked = options.sort.set;
-        sortSelect.value = options.sort.value;
-
-        yearsInput.value = options.years.value.join(', ');
-        amountInput.value = options.amount.value;
+            years.value = options.years.value.join(', ');
+            amount.value = options.amount.value;
+        }
     });
 
     document.getElementById('save').addEventListener('click', () => {
-        const years = yearsInput.value.split(/\s*,\s*/);
+        const years = years.value.split(/\s*,\s*/);
 
         localStorage.setItem('options', JSON.stringify({
             type: {
@@ -34,7 +34,7 @@
                 value: sortSelect.value
             },
             years: years,
-            amount: parseInt(amountInput.value)
+            amount: parseInt(amount.value)
         }));
     });
 })();
