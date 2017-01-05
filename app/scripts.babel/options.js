@@ -22,7 +22,7 @@
     });
 
     document.getElementById('save').addEventListener('click', () => {
-        const years = years.value.split(/\s*,\s*/);
+        const yearsArray = years.value.split(/\s*,\s*/);
 
         localStorage.setItem('options', JSON.stringify({
             type: {
@@ -33,7 +33,7 @@
                 set: sortCheckbox.checked,
                 value: sortSelect.value
             },
-            years: years,
+            years: yearsArray,
             amount: parseInt(amount.value)
         }));
     });

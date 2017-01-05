@@ -1,6 +1,4 @@
 (function () {
-    const DataType = 'text/json;charset=utf-8,';
-
     chrome.runtime.onMessage.addListener(
         function (request) {
             if (request.type === 'options') {
@@ -9,7 +7,7 @@
         });
 
     function download(obj, filename = 'data') {
-        const data = DataType + encodeURIComponent(JSON.stringify(obj));
+        const data = `text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(obj))}`;
 
         const a = document.createElement('a');
         a.href = `data:${data}`;
