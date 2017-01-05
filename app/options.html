@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+<head>
+    <link href="styles/main.css" rel="stylesheet">
+</head>
+<body>
+
+<h1>Export options</h1>
+
+<div id="type-options">
+    <label for="type">Type:
+        <select id="type">
+            <option value="movie">Movie</option>
+            <option value="show">Show</option>
+        </select>
+        <input id="cbType" type="checkbox">
+    </label>
+</div>
+
+<div id="sort-options">
+    <label for="sort">
+        <span>Sort:</span>
+        <select id="sort">
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+        </select>
+        <input id="cbSort" type="checkbox">
+    </label>
+</div>
+
+<div id="amount-options">
+    <label for="amount">
+        <span>Max amount</span>
+        <input id="amount" type="number">
+    </label>
+</div>
+
+<div id="year-options">
+    <label>
+        <span>Years:</span>
+    </label>
+    <input type="text" id="years" placeholder="Years separated by comma's like 2015, 2016">
+</div>
+
+<div id="save-block">
+    <button id="save">Save</button>
+</div>
+
+<script src="scripts/options.js"></script>
+
+</body>
+</html>
