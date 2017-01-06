@@ -1,10 +1,9 @@
-(function () {
-    chrome.runtime.onMessage.addListener(
-        function (request) {
-            if (request.type === 'options') {
-                download(getWithOptions(request.options), Manipulation.getLastSegmentOfUrl(request.url));
-            }
-        });
+(() => {
+    chrome.runtime.onMessage.addListener(request => {
+        if (request.type === 'options') {
+            download(getWithOptions(request.options), Manipulation.getLastSegmentOfUrl(request.url));
+        }
+    });
 
     function download(obj, filename = 'data') {
         const data = `text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(obj))}`;
@@ -42,7 +41,7 @@
 
     const Manipulation = {
 
-        sortByDate: function (entries, type) {
+        sortByDate (entries, type) {
             return entries.sort((a, b) => {
                 return type === 'asc'
                     ? new Date(a.released) - new Date(b.released)
@@ -50,15 +49,15 @@
             });
         },
 
-        filterByType: function (entries, type) {
+        filterByType (entries, type) {
             return entries.filter(obj => obj.type === type);
         },
 
-        filterByYears: function (entries, years) {
+        filterByYears (entries, years) {
             return entries.filter(obj => years.some(year => obj.released.startsWith(year)));
         },
 
-        getLastSegmentOfUrl: function (url) {
+        getLastSegmentOfUrl (url) {
             return (url.endsWith('/') ? url.slice(0, -1) : url).split('/').pop();
         }
 
@@ -66,21 +65,22 @@
 
     const Selection = {
 
-        createEntryFromElement: function (el) {
+        createEntryFromElement (el) {
             return {
                 title: this.getTitle(el),
                 type: el.getAttribute('data-type'),
                 released: el.getAttribute('data-released'),
                 poster: this.getPoster(el),
-                percentage: el.getAttribute('data-percentage')
+                percentage: el.getAttribute('data-percentage'),
+                rank: el.getAttribute('data-rank')
             };
         },
 
-        getTitle: function (el) {
+        getTitle (el) {
             return el.querySelector('a.titles-link div.titles h3').innerText;
         },
 
-        getPoster: function (el) {
+        getPoster (el) {
             return el.querySelector('a div.poster img.real').getAttribute('data-original');
         }
 
