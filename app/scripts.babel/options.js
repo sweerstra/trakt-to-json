@@ -14,7 +14,9 @@
             typeSelect.value = options.type.value;
             sortCheckbox.checked = options.sort.set;
             sortSelect.value = options.sort.value;
-            years.value = options.years.join(', ');
+            if (options.years) {
+                years.value = options.years.join(', ');
+            }
             amount.value = options.amount;
         }
     });
