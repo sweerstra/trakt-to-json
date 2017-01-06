@@ -8,7 +8,6 @@
 
     function download(obj, filename = 'data') {
         const data = `text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(obj))}`;
-
         const a = document.createElement('a');
         a.href = `data:${data}`;
         a.download = `trakt_${filename}.json`;
@@ -38,9 +37,7 @@
     }
 
     function getEntries() {
-        const nodeList = document.querySelectorAll('.grid-item');
-
-        return Array.from(nodeList).map(el => Selection.createEntryFromElement(el));
+        return Array.from(document.querySelectorAll('.grid-item')).map(el => Selection.createEntryFromElement(el));
     }
 
     const Manipulation = {
