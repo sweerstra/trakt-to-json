@@ -15,7 +15,7 @@
                 request.options.years = [];
             }
 
-            download(getEntriesWithOptions(request.options), ExportHelper.generateFilename(type, request.url));
+            download(getItemsWithOptions(request.options), ExportHelper.generateFilename(type, request.url));
         }
     });
 
@@ -27,48 +27,48 @@
         a.click();
     }
 
-    function getEntriesWithOptions(options) {
-        let entries = getEntries();
+    function getItemsWithOptions(options) {
+        let items = getItems();
 
         if (options.type.set) {
-            entries = Manipulation.filterByType(entries, options.type.value);
+            items = Manipulation.filterByType(items, options.type.value);
         }
 
         if (options.sort.set) {
-            entries = Manipulation.sortByDate(entries, options.sort.value);
+            items = Manipulation.sortByDate(items, options.sort.value);
         }
 
         if (options.years.length > 0) {
-            entries = Manipulation.filterByYears(entries, options.years)
+            items = Manipulation.filterByYears(items, options.years)
         }
 
-        if (options.amount && entries.length > options.amount) {
-            entries = entries.slice(0, options.amount);
+        if (options.amount && items.length > options.amount) {
+            items = items.slice(0, options.amount);
         }
 
-        return entries;
+        return items;
     }
 
-    function getEntries() {
-        return Array.from(document.querySelectorAll('.grid-item')).map(el => Selection.createEntryFromElement(el));
+    function getItems() {
+        return Array.from(document.querySelectorAll('.grid-item')).map(el => Selection.createItemFromElement(el));
     }
 
     const Manipulation = {
 
-        sortByDate (entries, type) {
-            return entries.sort((a, b) => {
+        sortByDate (items, type) {
+            return items.sort((a, b) => {
                 return type === 'asc'
                     ? new Date(a.released) - new Date(b.released)
                     : new Date(b.released) - new Date(a.released);
             });
         },
 
-        filterByType (entries, type) {
-            return entries.filter(obj => obj.type === type);
+        filterByType (items, type) {
+            return items.filter(obj => obj.type === type);
         },
 
-        filterByYears (entries, years) {
-            return entries.filter(obj => years.some(year => obj.released.startsWith(year)));
+        filterByYears (items, years) {
+            return items.filter(obj => years.some(year => obj.released.startsWith(year)));
         }
 
     };
@@ -122,7 +122,7 @@
 
     const Selection = {
 
-        createEntryFromElement (el) {
+        createItemFromElement (el) {
             return {
                 title: this.getTitle(el),
                 type: el.getAttribute('data-type'),
