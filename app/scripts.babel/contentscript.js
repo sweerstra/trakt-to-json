@@ -1,16 +1,21 @@
 (() => {
-    const LISTS = 'lists',
-        WATCHLIST = 'watchlist',
-        HISTORY = 'history',
-        RATINGS = 'ratings';
+    const UrlType = {
+        Lists: 'lists',
+        Watchlist: 'watchlist',
+        History: 'history',
+        Ratings: 'ratings'
+    };
 
     chrome.runtime.onMessage.addListener(request => {
         if (request.type === 'options') {
             const type = UrlHelper.getUrlType(request.url);
 
-            const entries = type === LISTS || type === WATCHLIST ? getEntriesWithOptions(request.options) : getEntries();
+            if (type === UrlType.History || type === UrlType.Ratings) {
+                request.options.sort.set = false;
+                request.options.years = [];
+            }
 
-            download(entries, ExportHelper.generateFilename(type, request.url));
+            download(getEntriesWithOptions(request.options), ExportHelper.generateFilename(type, request.url));
         }
     });
 
@@ -88,13 +93,13 @@
 
         generateFilename(type, url) {
 
-            if (type === LISTS || type === WATCHLIST) {
+            if (type === UrlType.Lists || type === UrlType.Watchlist) {
                 return this.getListFilename(url);
             }
-            else if (type === HISTORY) {
+            else if (type === UrlType.History) {
                 return this.getHistoryFilename(url);
             }
-            else if (type === RATINGS) {
+            else if (type === UrlType.Ratings) {
                 return this.getRatingsFilename(url);
             }
 
@@ -110,7 +115,6 @@
 
         getHistoryFilename(url) {
             const segments = UrlHelper.getSegmentsOfUrl(url).slice(3);
-
             return (UrlHelper.emptyQuerystringValue(url) ? segments.slice(0, 4) : segments).join('_');
         },
 
