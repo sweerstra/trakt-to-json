@@ -26,7 +26,9 @@
     {
       "matches": [
         "*://*.trakt.tv/users*lists/*",
-        "*://*.trakt.tv/users*watchlist"
+        "*://*.trakt.tv/users*watchlist",
+        "*://*.trakt.tv/users*history/*",
+        "*://*.trakt.tv/users*ratings/*"
       ],
       "js": [
         "scripts/contentscript.js"

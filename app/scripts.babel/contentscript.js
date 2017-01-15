@@ -1,7 +1,7 @@
 (() => {
     chrome.runtime.onMessage.addListener(request => {
         if (request.type === 'options') {
-            download(getWithOptions(request.options), Manipulation.getLastSegmentOfUrl(request.url));
+            download(getWithOptions(request.options), ExportHelper.getListUrl(request.url));
         }
     });
 
@@ -55,10 +55,32 @@
 
         filterByYears (entries, years) {
             return entries.filter(obj => years.some(year => obj.released.startsWith(year)));
+        }
+
+    };
+
+    const ExportHelper = {
+
+        getListUrl (url) {
+            return this.getSegmentsOfUrl(url).pop();
         },
 
-        getLastSegmentOfUrl (url) {
-            return (url.endsWith('/') ? url.slice(0, -1) : url).split('/').pop();
+        getRatingsUrl (url) {
+            return this.getSegmentsOfUrl(url).slice(-5).join('_');
+        },
+
+        getHistoryUrl(url) {
+            const segments = this.getSegmentsOfUrl(url).slice(3);
+
+            return (this.emptyQuerystringValue(url) ? segments.slice(0, 4) : segments).join('_');
+        },
+
+        getSegmentsOfUrl(url) {
+            return (url.endsWith('/') ? url.slice(0, -1) : url).split(/[/=?]+/);
+        },
+
+        emptyQuerystringValue(querystring) {
+            return querystring.split('=').filter(Boolean).length == 1;
         }
 
     };
