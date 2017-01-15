@@ -6,7 +6,11 @@
 
     chrome.runtime.onMessage.addListener(request => {
         if (request.type === 'options') {
-            download(getWithOptions(request.options), ExportHelper.generateFilename(request.url));
+            const type = UrlHelper.getUrlType(request.url);
+
+            const entries = type === LISTS || type === WATCHLIST ? getEntriesWithOptions(request.options) : getEntries();
+
+            download(entries, ExportHelper.generateFilename(type, request.url));
         }
     });
 
@@ -18,7 +22,7 @@
         a.click();
     }
 
-    function getWithOptions(options) {
+    function getEntriesWithOptions(options) {
         let entries = getEntries();
 
         if (options.type.set) {
@@ -66,7 +70,7 @@
 
     const UrlHelper = {
 
-        getUrlType (url) {
+        getUrlType(url) {
             return this.getSegmentsOfUrl(url).slice(4).shift();
         },
 
@@ -82,19 +86,16 @@
 
     const ExportHelper = {
 
-        generateFilename(url) {
-
-            const type = UrlHelper.getUrlType(url);
+        generateFilename(type, url) {
 
             if (type === LISTS || type === WATCHLIST) {
-                this.getListFilename(url);
+                return this.getListFilename(url);
             }
-
             else if (type === HISTORY) {
-                this.getHistoryFilename(url);
+                return this.getHistoryFilename(url);
             }
             else if (type === RATINGS) {
-                this.getRatingsFilename(url);
+                return this.getRatingsFilename(url);
             }
 
         },
