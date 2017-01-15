@@ -1,7 +1,12 @@
 (() => {
+    const LISTS = 'lists',
+        WATCHLIST = 'watchlist',
+        HISTORY = 'history',
+        RATINGS = 'ratings';
+
     chrome.runtime.onMessage.addListener(request => {
         if (request.type === 'options') {
-            download(getWithOptions(request.options), ExportHelper.getListUrl(request.url));
+            download(getWithOptions(request.options), ExportHelper.generateFilename(request.url));
         }
     });
 
@@ -59,20 +64,10 @@
 
     };
 
-    const ExportHelper = {
+    const UrlHelper = {
 
-        getListUrl (url) {
-            return this.getSegmentsOfUrl(url).pop();
-        },
-
-        getRatingsUrl (url) {
-            return this.getSegmentsOfUrl(url).slice(-5).join('_');
-        },
-
-        getHistoryUrl(url) {
-            const segments = this.getSegmentsOfUrl(url).slice(3);
-
-            return (this.emptyQuerystringValue(url) ? segments.slice(0, 4) : segments).join('_');
+        getUrlType (url) {
+            return this.getSegmentsOfUrl(url).slice(4).shift();
         },
 
         getSegmentsOfUrl(url) {
@@ -82,6 +77,41 @@
         emptyQuerystringValue(querystring) {
             return querystring.split('=').filter(Boolean).length == 1;
         }
+
+    };
+
+    const ExportHelper = {
+
+        generateFilename(url) {
+
+            const type = UrlHelper.getUrlType(url);
+
+            if (type === LISTS || type === WATCHLIST) {
+                this.getListFilename(url);
+            }
+
+            else if (type === HISTORY) {
+                this.getHistoryFilename(url);
+            }
+            else if (type === RATINGS) {
+                this.getRatingsFilename(url);
+            }
+
+        },
+
+        getListFilename (url) {
+            return UrlHelper.getSegmentsOfUrl(url).pop();
+        },
+
+        getRatingsFilename (url) {
+            return UrlHelper.getSegmentsOfUrl(url).slice(-5).join('_');
+        },
+
+        getHistoryFilename(url) {
+            const segments = UrlHelper.getSegmentsOfUrl(url).slice(3);
+
+            return (UrlHelper.emptyQuerystringValue(url) ? segments.slice(0, 4) : segments).join('_');
+        },
 
     };
 
