@@ -23,16 +23,10 @@
 
     document.getElementById('save').addEventListener('click', () => {
         localStorage.setItem('options', JSON.stringify({
-            type: {
-                set: typeCheckbox.checked,
-                value: typeSelect.value
-            },
-            sort: {
-                set: sortCheckbox.checked,
-                value: sortSelect.value
-            },
+            type: typeSelect.value,
+            sort: sortCheckbox.checked ? sortSelect.value : null,
             years: years.value.split(/\s*,\s*/),
-            amount: parseInt(amount.value)
+            amount: +amount.value || null
         }));
     });
 })();
