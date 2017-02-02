@@ -1,21 +1,25 @@
 (() => {
-    const UrlType = {
-        Lists: 'lists',
-        Watchlist: 'watchlist',
-        History: 'history',
-        Ratings: 'ratings'
+    const file = {
+        lists: 'getListFilename',
+        watchlist: 'getListFilename',
+        history: 'getHistoryFilename',
+        ratings: 'getRatingsFilename'
     };
 
     chrome.runtime.onMessage.addListener(request => {
         if (request.type === 'options') {
             const type = UrlHelper.getUrlType(request.url);
 
-            if (type === UrlType.History || type === UrlType.Ratings) {
-                request.options.sort.set = false;
+            if (type === 'history' || type === 'ratings') {
+                request.options.sort = null;
                 request.options.years = [];
             }
 
-            download(getItemsWithOptions(request.options), ExportHelper.generateFilename(type, request.url));
+            const itemsToDownload = getItemsWithOptions(request.options);
+
+            if (itemsToDownload.length > 0) {
+                download(itemsToDownload, ExportHelper[file[type]](request.url));
+            }
         }
     });
 
@@ -27,40 +31,33 @@
         a.click();
     }
 
-    function getItemsWithOptions(options) {
-        let items = getItems();
+    function getItemsWithOptions({type, sort, years, amount}) {
+        let items = [...document.querySelectorAll('.grid-item')].map(el => Selection.createItemFromElement(el));
 
-        if (options.type.set) {
-            items = Manipulation.filterByType(items, options.type.value);
+        if (type !== 'all') {
+            items = Manipulation.filterByType(items, type.value);
         }
 
-        if (options.sort.set) {
-            items = Manipulation.sortByDate(items, options.sort.value);
+        if (sort) {
+            items = Manipulation.sortByDate(items, sort);
         }
 
-        if (options.years.length > 0) {
-            items = Manipulation.filterByYears(items, options.years)
+        if (years.length > 0) {
+            items = Manipulation.filterByYears(items, years)
         }
 
-        if (options.amount && items.length > options.amount) {
-            items = items.slice(0, options.amount);
+        if (amount && items.length > amount) {
+            items = items.slice(0, amount);
         }
 
         return items;
     }
 
-    function getItems() {
-        return Array.from(document.querySelectorAll('.grid-item')).map(el => Selection.createItemFromElement(el));
-    }
-
     const Manipulation = {
 
         sortByDate (items, type) {
-            return items.sort((a, b) => {
-                return type === 'asc'
-                    ? new Date(a.released) - new Date(b.released)
-                    : new Date(b.released) - new Date(a.released);
-            });
+            const sorted = items.sort((a, b) => new Date(a.released) - new Date(b.released));
+            return type === 'asc' ? sorted : sorted.reverse();
         },
 
         filterByType (items, type) {
@@ -84,26 +81,12 @@
         },
 
         emptyQuerystringValue(querystring) {
-            return querystring.split('=').filter(Boolean).length == 1;
+            return querystring.split('=').filter(Boolean).length === 1;
         }
 
     };
 
     const ExportHelper = {
-
-        generateFilename(type, url) {
-
-            if (type === UrlType.Lists || type === UrlType.Watchlist) {
-                return this.getListFilename(url);
-            }
-            else if (type === UrlType.History) {
-                return this.getHistoryFilename(url);
-            }
-            else if (type === UrlType.Ratings) {
-                return this.getRatingsFilename(url);
-            }
-
-        },
 
         getListFilename (url) {
             return UrlHelper.getSegmentsOfUrl(url).pop();
@@ -116,7 +99,7 @@
         getHistoryFilename(url) {
             const segments = UrlHelper.getSegmentsOfUrl(url).slice(3);
             return (UrlHelper.emptyQuerystringValue(url) ? segments.slice(0, 4) : segments).join('_');
-        },
+        }
 
     };
 
