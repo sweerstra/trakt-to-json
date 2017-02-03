@@ -57,15 +57,18 @@
 
         sortByDate (items, type) {
             const sorted = items.sort((a, b) => new Date(a.released) - new Date(b.released));
-            return type === 'asc' ? sorted : sorted.reverse();
+
+            return type === 'desc'
+                ? sorted.reverse()
+                : sorted
         },
 
         filterByType (items, type) {
-            return items.filter(obj => obj.type === type);
+            return items.filter(item => item.type === type);
         },
 
         filterByYears (items, years) {
-            return items.filter(obj => years.some(year => obj.released.startsWith(year)));
+            return items.filter(item => years.some(year => item.released.startsWith(year)));
         }
 
     };
