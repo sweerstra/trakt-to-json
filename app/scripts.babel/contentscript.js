@@ -1,5 +1,5 @@
 (() => {
-    const file = {
+    const File = {
         lists: 'getListFilename',
         watchlist: 'getListFilename',
         history: 'getHistoryFilename',
@@ -18,7 +18,7 @@
             const items = getItems(options);
 
             if (items.length > 0) {
-                download(items, ExportHelper[file[type]](url));
+                download(items, ExportHelper[File[type]](url));
             }
         }
     });

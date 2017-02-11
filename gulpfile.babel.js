@@ -47,6 +47,7 @@ gulp.task('images', () => {
             })))
         .pipe(gulp.dest('dist/images'));
 });
+
 gulp.task('styles', () => {
     return gulp.src('app/styles.scss/*.scss')
         .pipe($.plumber())
