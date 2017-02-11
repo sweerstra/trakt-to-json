@@ -1,18 +1,19 @@
 (() => {
+    const Combinations = {
+        lists: 'getListFilename',
+        watchlist: 'getListFilename',
+        history: 'getHistoryFilename',
+        ratings: 'getRatingsFilename'
+    };
+
     class UrlParser {
         constructor(url) {
             this._segments = (url.endsWith('/') ? url.slice(0, -1) : url).split(/[/=?]+/);
             this._url = url;
-            this._combinations = {
-                lists: 'getListFilename',
-                watchlist: 'getListFilename',
-                history: 'getHistoryFilename',
-                ratings: 'getRatingsFilename'
-            };
         }
 
         getFilename(type) {
-            return this[this._combinations[type]]();
+            return this[Combinations[type]]();
         }
 
         getUrlType() {
@@ -52,8 +53,8 @@
         }
     });
 
-    function download(obj, filename = 'data') {
-        const data = `text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(obj))}`;
+    function download(array, filename) {
+        const data = `text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(array))}`;
         const a = document.createElement('a');
         a.href = `data:${data}`;
         a.download = `trakt_${filename}.json`;
