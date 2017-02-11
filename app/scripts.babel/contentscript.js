@@ -96,7 +96,7 @@
         return items.filter(item => years.some(year => item.released.startsWith(year)));
     }
 
-    function createItemFromElement(el) => {
+    function createItemFromElement(el) {
         return {
             title: el.querySelector('a.titles-link div.titles h3').innerText,
             type: el.getAttribute('data-type'),
