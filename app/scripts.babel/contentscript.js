@@ -6,19 +6,19 @@
         ratings: 'getRatingsFilename'
     };
 
-    chrome.runtime.onMessage.addListener(request => {
-        if (request.type === 'options') {
-            const type = UrlHelper.getUrlType(request.url);
+    chrome.runtime.onMessage.addListener(({type, url, options}) => {
+        if (type === 'options') {
+            const type = UrlHelper.getUrlType(url);
 
             if (type === 'history' || type === 'ratings') {
-                request.options.sort = null;
-                request.options.years = [];
+                options.sort = null;
+                options.years = [];
             }
 
-            const itemsToDownload = getItemsWithOptions(request.options);
+            const items = getItems(options);
 
-            if (itemsToDownload.length > 0) {
-                download(itemsToDownload, ExportHelper[file[type]](request.url));
+            if (items.length > 0) {
+                download(items, ExportHelper[file[type]](url));
             }
         }
     });
@@ -31,11 +31,11 @@
         a.click();
     }
 
-    function getItemsWithOptions({type, sort, years, amount}) {
+    function getItems({type, sort, years, amount}) {
         let items = [...document.querySelectorAll('.grid-item')].map(el => Selection.createItemFromElement(el));
 
         if (type !== 'all') {
-            items = Manipulation.filterByType(items, type.value);
+            items = Manipulation.filterByType(items, type);
         }
 
         if (sort) {
@@ -58,9 +58,7 @@
         sortByDate (items, type) {
             const sorted = items.sort((a, b) => new Date(a.released) - new Date(b.released));
 
-            return type === 'desc'
-                ? sorted.reverse()
-                : sorted
+            return type === 'desc' ? sorted.reverse() : sorted;
         },
 
         filterByType (items, type) {
