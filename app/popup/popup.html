@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="./popup.css">
+</head>
+<body>
+
+<div class="content">
+    <header>
+
+    </header>
+
+    <main class="controls">
+        <label>
+            Item type
+            <select name="type">
+                <option value="all">All</option>
+                <option value="movies">Movies</option>
+                <option value="shows">Shows</option>
+                <option value="episodes">Episodes</option>
+            </select>
+        </label>
+
+        <label>
+            Number of pages
+            <input type="number" name="pages" placeholder="Page amount"/>
+        </label>
+
+        <label>
+            Years to match
+            <input type="text" placeholder="i.e. 2017, 2018"/>
+        </label>
+
+        <label>
+            Sort items
+            <select name="sort">
+                <option value="">Don't sort</option>
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+            </select>
+        </label>
+    </main>
+
+    <footer>
+        <button>Export</button>
+    </footer>
+</div>
+
+<script src="./popup.js"></script>
+
+</body>
+</html>

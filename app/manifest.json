@@ -9,8 +9,7 @@
   },
   "background": {
     "scripts": [
-      "scripts/chromereload.js",
-      "scripts/background.js"
+      "background.js"
     ]
   },
   "permissions": [
@@ -19,7 +18,7 @@
     "https://*/*"
   ],
   "options_ui": {
-    "page": "options.html",
+    "page": "options/options.html",
     "chrome_style": true
   },
   "content_scripts": [
@@ -31,7 +30,7 @@
         "*://*.trakt.tv/users*ratings/*"
       ],
       "js": [
-        "scripts/contentscript.js"
+        "contentscript.js"
       ],
       "run_at": "document_end",
       "all_frames": false
@@ -42,6 +41,7 @@
       "19": "images/icon-19.png",
       "38": "images/icon-38.png"
     },
-    "default_title": "TraktToJson"
+    "default_title": "TraktTo",
+    "default_popup": "popup/popup.html"
   }
 }

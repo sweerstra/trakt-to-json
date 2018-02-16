@@ -1,0 +1,121 @@
+/* colors: https://dribbble.com/shots/4231606-The-Easterly-pt-II */
+
+:root {
+    --beige: #EEEADF;
+    --black: #373736;
+    --red: #F67198;
+    --light-grey: #A7A59E;
+}
+
+* {
+    font-family: inherit;
+    box-sizing: inherit;
+}
+
+html {
+    font-family: 'Roboto', sans-serif;
+    box-sizing: border-box;
+}
+
+body {
+    width: 400px;
+    margin: 20px;
+    background-color: var(--beige);
+}
+
+.content {
+    display: grid;
+    grid-gap: 30px;
+    grid-template-areas: "header" "main" "footer"
+}
+
+header {
+    color: var(--black);
+    font-size: 18px;
+    font-weight: bold;
+    grid-area: header;
+}
+
+.highlighted {
+    color: var(--red);
+    text-decoration: underline;
+}
+
+main.controls {
+    display: grid;
+    grid-gap: 20px;
+    grid-area: main;
+}
+
+label {
+    display: grid;
+    grid-gap: 20px;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+footer {
+    grid-area: footer;
+}
+
+footer button {
+    width: 100%;
+}
+
+input {
+    width: 100%;
+    padding: 8px;
+    font-size: 15px;
+    color: var(--black);
+    font-weight: bold;
+    background-color: var(--beige);
+    border: 2px solid var(--black);
+    border-radius: 4px;
+}
+
+input::placeholder {
+    color: var(--light-grey);
+    font-weight: normal;
+}
+
+select {
+    padding: 8px;
+    font-size: 15px;
+    color: var(--black);
+    background-color: var(--beige);
+    border: 2px solid var(--black);
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+select:disabled {
+    color: var(--light-grey);
+    border-color: var(--light-grey);
+    -webkit-appearance: none;
+    cursor: default;
+}
+
+button {
+    padding: 8px 30px;
+    color: var(--red);
+    background-color: var(--beige);
+    border: 2px solid var(--red);
+    border-radius: 4px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: var(--red);
+    color: var(--beige);
+}
+
+input:focus,
+select:focus,
+button:focus {
+    outline: none;
+}

@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+<head>
+    <link href="options.css" rel="stylesheet">
+</head>
+
+<body>
+
+<form name="options">
+    <label>
+        Type:
+        <select name="type" data-prop="value">
+            <option value="all">All</option>
+            <option value="movie">Movie</option>
+            <option value="show">Show</option>
+        </select>
+    </label>
+
+    <label>
+        Sort:
+        <select name="sort" data-prop="value">
+            <option></option>
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+        </select>
+    </label>
+
+    <label>
+        Max amount:
+        <input type="number" name="amount" data-prop="value">
+    </label>
+
+    <label>
+        Years:
+        <input type="text" name="years" data-prop="value" placeholder="'2015, 2016, 2017'">
+    </label>
+</form>
+
+</body>
+
+<script src="options.js"></script>
+
+</html>
