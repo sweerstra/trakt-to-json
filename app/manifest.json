@@ -1,5 +1,5 @@
 {
-  "name": "TraktTo",
+  "name": "Trakt To Json",
   "version": "0.0.1",
   "manifest_version": 2,
   "description": "Lets you export trakt.tv lists to json.",
@@ -7,36 +7,32 @@
     "16": "images/icon-16.png",
     "128": "images/icon-128.png"
   },
-  "background": {
-    "scripts": [
-      "background.js"
-    ]
-  },
   "permissions": [
     "tabs",
     "http://*/*",
     "https://*/*"
   ],
-  "options_ui": {
-    "page": "options/options.html",
-    "chrome_style": true
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
+    "persistent": false
   },
   "content_scripts": [
     {
       "matches": [
-        "*://*.trakt.tv/users*lists/*",
+        "*://*.trakt.tv/users*lists*",
         "*://*.trakt.tv/users*watchlist",
-        "*://*.trakt.tv/users*history/*",
-        "*://*.trakt.tv/users*ratings/*"
+        "*://*.trakt.tv/users*history**",
+        "*://*.trakt.tv/users*ratings*"
       ],
       "js": [
-        "contentscript.js"
+        "content.js"
       ],
-      "run_at": "document_end",
-      "all_frames": false
+      "run_at": "document_end"
     }
   ],
-  "browser_action": {
+  "page_action": {
     "default_icon": {
       "19": "images/icon-19.png",
       "38": "images/icon-38.png"

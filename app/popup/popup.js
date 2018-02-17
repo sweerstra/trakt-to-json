@@ -1,63 +1,39 @@
-class UrlParser {
-    constructor(url) {
-        this._segments = (url.endsWith('/') ? url.slice(0, -1) : url).split(/[/=?]+/);
-        return this;
-    }
-
-    get segments() {
-        return this._segments;
-    }
-
-    getUrlType() {
-        return this._segments[4];
-    }
-
-    getItemType() {
-        return this._segments[5] || 'all';
-    }
-
-    getUrlSegmentsForHeader() {
-        const slice = this._segments.slice(3);
-        return slice[slice.length - 1] ? slice : slice.slice(0, -2);
-    }
-}
-
-const header = document.querySelector('header');
+const urlHeader = document.querySelector('header');
 const itemTypeSelect = document.querySelector('select[name=type]');
 const pagesInput = document.querySelector('input[name=pages]');
+const exportButton = document.getElementById('export');
 
-const setStyle = (url) => {
-    const parser = new UrlParser(url);
-    const segments = parser.getUrlSegmentsForHeader();
-    const urlType = parser.getUrlType();
-    const itemType = parser.getItemType();
+const setStyle = ({ id, url }) => {
+    chrome.tabs.sendMessage(id, { type: 'parse', url }, ({ user, traktType, itemType }) => {
+        if (traktType === 'history' || traktType === 'ratings') {
+            itemTypeSelect.value = itemType;
+            itemTypeSelect.disabled = true;
 
-    if (urlType === 'history' || urlType === 'ratings') {
-        itemTypeSelect.value = itemType;
-        itemTypeSelect.disabled = true;
+            getCurrentTab(tab => {
+                chrome.tabs.sendMessage(tab.id, { type: 'pagination' }, ({ length }) => {
+                    if (length === 0) {
+                        exportButton.disabled = true;
+                    } else {
+                        pagesInput.dataset.max = length;
+                    }
 
-        sendMessage({ type: 'pagination' }, ({ length }) => {
-            pagesInput.value = length;
-            pagesInput.max = length;
-        });
-    } else {
-        pagesInput.parentElement.style.display = 'none';
-    }
+                    pagesInput.value = length;
+                });
+            });
+        } else {
+            pagesInput.parentNode.parentNode.removeChild(pagesInput.parentNode);
+        }
 
-    header.innerHTML = createStyledUrlHeader(segments, urlType, itemType);
-};
-
-const createStyledUrlHeader = (segments, urlType, itemType) => {
-    const highlight = value => `<span class="highlighted">${value}</span>`;
-    segments[segments.indexOf(urlType)] = highlight(urlType);
-    segments[segments.indexOf(itemType)] = highlight(itemType);
-    return segments.join(' / ');
-};
-
-const sendMessage = (message, callback) => {
-    getCurrentTab(tab => {
-        chrome.tabs.sendMessage(tab.id, message, callback);
+        urlHeader.innerHTML = createStyledUrlHeader(user, traktType, itemType);
     });
+};
+
+const createStyledUrlHeader = (user, traktType, itemType) => {
+    return `
+        ${user} /
+        <span class="highlighted">${traktType}</span> /
+        <span class="highlighted">${itemType}</span>
+    `;
 };
 
 const getCurrentTab = (callback) => {
@@ -66,5 +42,39 @@ const getCurrentTab = (callback) => {
     });
 };
 
-getCurrentTab((tab) => setStyle(tab.url));
+document.addEventListener('DOMContentLoaded', () => {
+    getCurrentTab(setStyle);
+});
 
+exportButton.addEventListener('click', () => {
+    const options = Array.from(document.querySelectorAll('[name]')).reduce((options, { name, value }) => {
+        options[name] = value;
+        return options;
+    }, {});
+
+    if (pagesInput || !options.pages) {
+        const maxPages = pagesInput.dataset.max;
+
+        if (options.pages > maxPages) {
+            options.pages = maxPages;
+        }
+    }
+
+    options.years = options.years
+        ? options.years.trim().split(/\s*,\s*/)
+        : [];
+
+    getCurrentTab(({ id, url }) => {
+        chrome.tabs.sendMessage(id, { type: 'export', url, options });
+    });
+});
+
+pagesInput.addEventListener('input', ({ target }) => {
+    const { value, dataset } = target;
+
+    if (value > dataset.max) {
+        exportButton.disabled = true;
+    }
+
+    exportButton.disabled = !value || !parseInt(value);
+});

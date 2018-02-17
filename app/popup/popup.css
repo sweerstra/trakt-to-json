@@ -52,6 +52,7 @@ label {
     grid-gap: 20px;
     grid-template-columns: 1fr 1fr;
     align-items: center;
+    color: var(--black);
     font-size: 16px;
     font-weight: bold;
 }
@@ -91,6 +92,7 @@ select {
     cursor: pointer;
 }
 
+button:disabled,
 select:disabled {
     color: var(--light-grey);
     border-color: var(--light-grey);
@@ -109,7 +111,7 @@ button {
     cursor: pointer;
 }
 
-button:hover {
+button:not([disabled]):hover {
     background-color: var(--red);
     color: var(--beige);
 }

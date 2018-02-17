@@ -1,9 +1,7 @@
-chrome.browserAction.onClicked.addListener(({ id, url }) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, () => {
-        chrome.tabs.sendMessage(id, {
-            url,
-            type: 'options',
-            options: JSON.parse(localStorage.getItem('options'))
-        });
-    });
+chrome.tabs.onUpdated.addListener((tabId, info, { url }) => {
+    const types = ['history', 'ratings', 'watchlist', 'lists'];
+
+    if (url.includes('trakt.tv') && types.some(type => url.includes(type))) {
+        chrome.pageAction.show(tabId);
+    }
 });
