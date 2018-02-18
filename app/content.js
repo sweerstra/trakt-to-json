@@ -34,25 +34,38 @@ chrome.runtime.onMessage.addListener(({ type: messageType, url, options }, sende
             parser = new TraktUrlParser(url);
             const type = parser.getTraktType();
 
-            type === 'history' || type === 'ratings'
+            (options.pages !== '1' && (type === 'history' || type === 'ratings')
                 ? getItemsFromMultiplePages(parser.getMultiPageUrl(), options.pages)
-                : getItemsFromCurrentPage(type, options).then(items => {
-                    if (items.length > 0) {
-                        const filename = prompt('Choose filename export file');
-                        if (filename) {
-                            download(filterItems(items, type, options), filename);
-                        }
+                : getItemsFromCurrentPage(type, options))
+                .then(items => {
+                    if (items.length === 0) {
+                        sendResponse({ error: true });
+                        return;
                     }
-                });
 
+                    const filteredItems = filterItems(items, type, options);
+                    const shouldExport = filteredItems.length > 0;
+
+                    if (shouldExport) {
+                        download(
+                            options.letterboxd
+                                ? mapItemsToLetterboxdExport(filteredItems)
+                                : filteredItems
+                        );
+                    }
+
+                    sendResponse({ error: !shouldExport });
+                });
             break;
 
         case 'parse':
             parser = new TraktUrlParser(url);
-            const user = parser.getUser();
-            const traktType = parser.getTraktType();
-            const itemType = parser.getItemType();
-            sendResponse({ user, traktType, itemType });
+
+            sendResponse({
+                user: parser.getUser(),
+                traktType: parser.getTraktType(),
+                itemType: parser.getItemType()
+            });
             break;
     }
 
@@ -88,7 +101,7 @@ const filterItems = (items, traktType, { type, sort, years }) => {
     if (sort) {
         const asc = sort === 'asc' ? 1 : -1;
         const desc = sort === 'desc' ? 1 : -1;
-        items = items.sort((a, b) => new Date(a.released) > new Date(b.released) ? asc : desc);
+        items = items.sort((a, b) => new Date(a.date) > new Date(b.date) ? asc : desc);
     }
 
     if (years.length > 0) {
@@ -99,7 +112,13 @@ const filterItems = (items, traktType, { type, sort, years }) => {
 };
 
 const createItemFromElement = (el) => {
-    const { type, url, percentage, rank, released } = el.dataset;
+    const { type, url, percentage, rank } = el.dataset;
+
+    let date = el.dataset.released;
+    if (date === undefined) {
+        const dateElement = el.querySelector('[class$="-date"]');
+        date = dateElement && dateElement.dataset.date.slice(0, 10);
+    }
 
     return {
         title: el.querySelector('a.titles-link div.titles h3').textContent,
@@ -108,16 +127,20 @@ const createItemFromElement = (el) => {
         url,
         percentage: percentage || el.querySelector('.percentage').textContent.slice(0, -1),
         rank,
-        released: released || el.querySelector('.format-date').dataset.date.slice(0, 10),
-        year: url.split('-').pop()
+        date,
+        year: date.slice(0, 4)
     };
 };
 
-const download = (items, filename) => {
+const mapItemsToLetterboxdExport = (items) => {
+    return items.map(item => ({ Title: item.title, Year: item.year }));
+};
+
+const download = (items) => {
     const data = `text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(items))}`;
     const a = document.createElement('a');
     a.href = `data:${data}`;
-    a.download = `trakt_${filename}.json`;
+    a.download = `data.json`;
     a.click();
 };
 

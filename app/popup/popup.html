@@ -9,7 +9,8 @@
 
 <div class="content">
     <header>
-
+        <img src="../images/icon-128.png" class="logo">
+        <div class="url"></div>
     </header>
 
     <main class="controls">
@@ -25,26 +26,46 @@
 
         <label>
             Number of pages
-            <input type="number" name="pages" placeholder="Page amount"/>
+            <input type="number" name="pages" placeholder="Page amount" data-min="0"/>
         </label>
 
         <label>
             Years of release
-            <input type="text" name="years" placeholder="i.e. 2017, 2018"/>
+            <input type="text" name="years" placeholder="Years (comma separated)"/>
         </label>
 
         <label>
-            Sort by release date
+            Sort by date
             <select name="sort">
                 <option value="">Don't sort</option>
                 <option value="asc">Ascending</option>
                 <option value="desc">Descending</option>
             </select>
         </label>
+
+        <label>
+            Letterboxd format
+            <input type="checkbox" name="letterboxd"/>
+        </label>
     </main>
 
     <footer>
         <button id="export">Export</button>
+        <p class="error">No items were found, try again with different settings.</p>
+        <div id="loader">
+            <div class="circle circle1"></div>
+            <div class="circle circle2"></div>
+            <div class="circle circle3"></div>
+            <div class="circle circle4"></div>
+            <div class="circle circle5"></div>
+            <div class="circle circle6"></div>
+            <div class="circle circle7"></div>
+            <div class="circle circle8"></div>
+            <div class="circle circle9"></div>
+            <div class="circle circle10"></div>
+            <div class="circle circle11"></div>
+            <div class="circle circle12"></div>
+        </div>
     </footer>
 </div>
 

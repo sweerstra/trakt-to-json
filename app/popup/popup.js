@@ -1,7 +1,9 @@
-const urlHeader = document.querySelector('header');
+const urlHeader = document.querySelector('header .url');
 const itemTypeSelect = document.querySelector('select[name=type]');
 const pagesInput = document.querySelector('input[name=pages]');
 const exportButton = document.getElementById('export');
+const errorText = document.querySelector('.error');
+const loader = document.getElementById('loader');
 
 const setStyle = ({ id, url }) => {
     chrome.tabs.sendMessage(id, { type: 'parse', url }, ({ user, traktType, itemType }) => {
@@ -16,7 +18,6 @@ const setStyle = ({ id, url }) => {
                     } else {
                         pagesInput.dataset.max = length;
                     }
-
                     pagesInput.value = length;
                 });
             });
@@ -24,16 +25,10 @@ const setStyle = ({ id, url }) => {
             pagesInput.parentNode.parentNode.removeChild(pagesInput.parentNode);
         }
 
-        urlHeader.innerHTML = createStyledUrlHeader(user, traktType, itemType);
+        urlHeader.innerHTML = `${user} /
+                               <span class="highlighted">${traktType}</span> /
+                               <span class="highlighted">${itemType}</span>`;
     });
-};
-
-const createStyledUrlHeader = (user, traktType, itemType) => {
-    return `
-        ${user} /
-        <span class="highlighted">${traktType}</span> /
-        <span class="highlighted">${itemType}</span>
-    `;
 };
 
 const getCurrentTab = (callback) => {
@@ -47,15 +42,19 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 exportButton.addEventListener('click', () => {
-    const options = Array.from(document.querySelectorAll('[name]')).reduce((options, { name, value }) => {
-        options[name] = value;
+    exportButton.style.display = 'none';
+    loader.style.display = 'block';
+
+    const options = Array.from(document.querySelectorAll('[name]')).reduce((options, { name, type, value, checked }) => {
+        options[name] = type === 'checkbox' ? checked : value;
         return options;
     }, {});
 
-    if (pagesInput || !options.pages) {
-        const maxPages = pagesInput.dataset.max;
+    const pages = parseInt(options.pages, 10);
+    if (pagesInput && pages) {
+        const maxPages = parseInt(pagesInput.dataset.max, 10);
 
-        if (options.pages > maxPages) {
+        if (pages > maxPages) {
             options.pages = maxPages;
         }
     }
@@ -65,16 +64,27 @@ exportButton.addEventListener('click', () => {
         : [];
 
     getCurrentTab(({ id, url }) => {
-        chrome.tabs.sendMessage(id, { type: 'export', url, options });
+        chrome.tabs.sendMessage(id, { type: 'export', url, options }, ({ error }) => {
+            loader.style.display = 'none';
+
+            if (error) {
+                exportButton.style.display = 'block';
+                errorText.style.display = 'block';
+            }
+        });
     });
 });
 
 pagesInput.addEventListener('input', ({ target }) => {
-    const { value, dataset } = target;
+    const { value, dataset: { min, max } } = target;
 
-    if (value > dataset.max) {
-        exportButton.disabled = true;
+    if (value) {
+        if (value > max) {
+            pagesInput.value = max;
+        } else if (value < min) {
+            pagesInput.value = min;
+        }
     }
 
-    exportButton.disabled = !value || !parseInt(value);
+    exportButton.disabled = !value || !parseInt(value, 10);
 });
