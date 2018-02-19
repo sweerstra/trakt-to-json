@@ -26,39 +26,35 @@ chrome.runtime.onMessage.addListener(({ type: messageType, url, options }, sende
     let parser;
 
     switch (messageType) {
-        case 'pagination':
+        case 'get-pagination-length':
             sendResponse({ length: getPaginationLength() || 1 });
             break;
 
         case 'export':
             parser = new TraktUrlParser(url);
-            const type = parser.getTraktType();
+            const traktType = parser.getTraktType();
 
-            (options.pages !== '1' && (type === 'history' || type === 'ratings')
-                ? getItemsFromMultiplePages(parser.getMultiPageUrl(), options.pages)
-                : getItemsFromCurrentPage(type, options))
+            (options.pages === '1' || traktType === 'watchlist' || traktType === 'lists'
+                ? getItemsFromCurrentPage()
+                : getItemsFromMultiplePages(parser.getMultiPageUrl(), options.pages))
                 .then(items => {
                     if (items.length === 0) {
                         sendResponse({ error: true });
                         return;
                     }
 
-                    const filteredItems = filterItems(items, type, options);
-                    const shouldExport = filteredItems.length > 0;
+                    const filteredItems = filterItems(items, traktType, options);
+                    const hasItemsToExport = filteredItems.length > 0;
 
-                    if (shouldExport) {
-                        download(
-                            options.letterboxd
-                                ? mapItemsToLetterboxdExport(filteredItems)
-                                : filteredItems
-                        );
+                    if (hasItemsToExport) {
+                        download(filteredItems);
                     }
 
-                    sendResponse({ error: !shouldExport });
+                    sendResponse({ error: !hasItemsToExport });
                 });
             break;
 
-        case 'parse':
+        case 'get-parsed-url':
             parser = new TraktUrlParser(url);
 
             sendResponse({
@@ -72,30 +68,28 @@ chrome.runtime.onMessage.addListener(({ type: messageType, url, options }, sende
     return true;
 });
 
-const getItemsFromCurrentPage = () => {
+const getItemsFromCurrentPage = (element = document) => {
     return Promise.resolve(
-        Array.from(document.querySelectorAll('.grid-item'), createItemFromElement)
+        Array.from(element.querySelectorAll('.grid-item'), createItemFromElement)
     );
 };
 
 const getItemsFromMultiplePages = (multiPageUrl, length) => {
     const url = `https://i321720.iris.fhict.nl/php/web_scrape.php?target=${multiPageUrl}`;
 
-    const fetches = Array.from({ length }, (_, index) =>
-        fetch(url + (index + 1)).then(resp => resp.text())
-    );
+    const pages = Array.from({ length }, (_, index) =>
+        fetch(url + (index + 1)).then(resp => resp.text()));
 
-    return Promise.all(fetches).then(html => {
+    return Promise.all(pages).then(html => {
         const container = document.createElement('div');
         container.innerHTML = html;
-
-        return Array.from(container.querySelectorAll('.grid-item'), createItemFromElement);
+        return getItemsFromCurrentPage(container);
     });
 };
 
-const filterItems = (items, traktType, { type, sort, years }) => {
-    if (traktType.includes('list') && type !== 'all') {
-        items = items.filter(item => item.type === type);
+const filterItems = (items, traktType, { type: itemType, sort, years, letterboxd }) => {
+    if (traktType.includes('list') && itemType !== 'all') {
+        items = items.filter(item => item.type === itemType);
     }
 
     if (sort) {
@@ -106,6 +100,10 @@ const filterItems = (items, traktType, { type, sort, years }) => {
 
     if (years.length > 0) {
         items = items.filter(item => years.includes(item.year));
+    }
+
+    if (letterboxd) {
+        items = items.map(item => ({ Title: item.title, Year: item.year }));
     }
 
     return items;
@@ -130,10 +128,6 @@ const createItemFromElement = (el) => {
         date,
         year: date.slice(0, 4)
     };
-};
-
-const mapItemsToLetterboxdExport = (items) => {
-    return items.map(item => ({ Title: item.title, Year: item.year }));
 };
 
 const download = (items) => {

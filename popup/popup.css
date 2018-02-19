@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+
 :root {
     --color-background: white;
     --color-main: black;
@@ -5,14 +7,13 @@
     --color-disabled: #A7A59E;
 }
 
-* {
-    font-family: inherit;
-    box-sizing: inherit;
+html {
+    box-sizing: border-box;
 }
 
-html {
-    font-family: 'Roboto', sans-serif;
-    box-sizing: border-box;
+* {
+    font-family: 'Open Sans', sans-serif;
+    box-sizing: inherit;
 }
 
 body {
@@ -34,14 +35,14 @@ header {
     justify-content: space-between;
 }
 
-header .url {
+.header__url {
     color: var(--color-main);
     font-size: 18px;
     font-weight: bold;
     text-align: center;
 }
 
-header .logo {
+.header__logo {
     width: 50px;
     height: 50px;
 }
@@ -51,7 +52,7 @@ header .logo {
     text-decoration: underline;
 }
 
-main.controls {
+main {
     display: grid;
     grid-gap: 20px;
     grid-area: main;
@@ -71,7 +72,7 @@ footer {
     grid-area: footer;
 }
 
-footer button {
+#export {
     width: 100%;
 }
 
@@ -99,7 +100,6 @@ input::placeholder {
 }
 
 select {
-    height: 40px;
     padding: 8px;
     font-size: 15px;
     color: var(--color-main);
@@ -108,14 +108,6 @@ select {
     border-radius: 4px;
     font-weight: bold;
     cursor: pointer;
-}
-
-button:disabled,
-select:disabled {
-    color: var(--color-disabled);
-    border-color: var(--color-disabled);
-    -webkit-appearance: none;
-    cursor: default;
 }
 
 button {
@@ -127,6 +119,14 @@ button {
     font-size: 15px;
     font-weight: bold;
     cursor: pointer;
+}
+
+button:disabled,
+select:disabled {
+    color: var(--color-disabled);
+    border-color: var(--color-disabled);
+    -webkit-appearance: none;
+    cursor: default;
 }
 
 button:not([disabled]):hover {

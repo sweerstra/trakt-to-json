@@ -1,39 +1,27 @@
-const urlHeader = document.querySelector('header .url');
-const itemTypeSelect = document.querySelector('select[name=type]');
-const pagesInput = document.querySelector('input[name=pages]');
-const exportButton = document.getElementById('export');
+const urlHeader = document.querySelector('#url');
+const settings = document.querySelector('#settings');
+const itemTypeSelect = document.querySelector('[name=type]');
+const pagesInput = document.querySelector('[name=pages]');
+const exportButton = document.querySelector('#export');
 const errorText = document.querySelector('.error');
-const loader = document.getElementById('loader');
+const loader = document.querySelector('#loader');
 
 const setStyle = ({ id, url }) => {
-    chrome.tabs.sendMessage(id, { type: 'parse', url }, ({ user, traktType, itemType }) => {
+    chrome.tabs.sendMessage(id, { type: 'get-parsed-url', url }, ({ user, traktType, itemType }) => {
         if (traktType === 'history' || traktType === 'ratings') {
             itemTypeSelect.value = itemType;
             itemTypeSelect.disabled = true;
 
-            getCurrentTab(tab => {
-                chrome.tabs.sendMessage(tab.id, { type: 'pagination' }, ({ length }) => {
-                    if (length === 0) {
-                        exportButton.disabled = true;
-                    } else {
-                        pagesInput.dataset.max = length;
-                    }
-                    pagesInput.value = length;
-                });
+            chrome.tabs.sendMessage(id, { type: 'get-pagination-length' }, ({ length }) => {
+                pagesInput.value = length;
+                pagesInput.dataset.max = length;
             });
         } else {
-            pagesInput.parentNode.parentNode.removeChild(pagesInput.parentNode);
+            settings.removeChild(pagesInput.parentNode);
         }
 
-        urlHeader.innerHTML = `${user} /
-                               <span class="highlighted">${traktType}</span> /
-                               <span class="highlighted">${itemType}</span>`;
-    });
-};
-
-const getCurrentTab = (callback) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
-        callback(tab);
+        const highlight = text => `<span class="highlighted">${text}</span>`;
+        urlHeader.innerHTML = `${user} / ${highlight(traktType)} / ${highlight(itemType)}`;
     });
 };
 
@@ -45,23 +33,16 @@ exportButton.addEventListener('click', () => {
     exportButton.style.display = 'none';
     loader.style.display = 'block';
 
-    const options = Array.from(document.querySelectorAll('[name]')).reduce((options, { name, type, value, checked }) => {
-        options[name] = type === 'checkbox' ? checked : value;
-        return options;
-    }, {});
+    const options = Array
+        .from(document.querySelectorAll('[name]'))
+        .reduce((options, { name, type, value, checked }) => {
+            options[name] = type === 'checkbox' ? checked : value;
+            return options;
+        }, {});
 
-    const pages = parseInt(options.pages, 10);
-    if (pagesInput && pages) {
-        const maxPages = parseInt(pagesInput.dataset.max, 10);
-
-        if (pages > maxPages) {
-            options.pages = maxPages;
-        }
-    }
-
-    options.years = options.years
-        ? options.years.trim().split(/\s*,\s*/)
-        : [];
+    options.years = options.years.trim()
+        .split(/\s*,\s*/)
+        .filter(Boolean);
 
     getCurrentTab(({ id, url }) => {
         chrome.tabs.sendMessage(id, { type: 'export', url, options }, ({ error }) => {
@@ -76,7 +57,9 @@ exportButton.addEventListener('click', () => {
 });
 
 pagesInput.addEventListener('input', ({ target }) => {
-    const { value, dataset: { min, max } } = target;
+    const value = parseInt(target.value, 10);
+    const min = parseInt(target.dataset.min, 10);
+    const max = parseInt(target.dataset.max, 10);
 
     if (value) {
         if (value > max) {
@@ -86,5 +69,11 @@ pagesInput.addEventListener('input', ({ target }) => {
         }
     }
 
-    exportButton.disabled = !value || !parseInt(value, 10);
+    exportButton.disabled = !value || value <= 0;
 });
+
+const getCurrentTab = (callback) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+        callback(tab);
+    });
+};
